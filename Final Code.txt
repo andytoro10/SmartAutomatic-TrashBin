@@ -1,0 +1,56 @@
+#include <Servo.h>
+
+// Pines del sensor ultrasónico
+const int trigPin = 2;
+const int echoPin = 3;
+
+// Servo
+Servo miServo;
+const int servoPin = 9;
+
+// Distancia mínima para activar el servo (en cm)
+const int distanciaMinima = 15;
+
+void setup() {
+  // Inicializar pines del sensor
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  
+  // Inicializar servo
+  miServo.attach(servoPin);
+  miServo.write(0); // Posición inicial
+  
+  Serial.begin(9600);
+}
+
+void loop() {
+  long duracion;
+  int distancia;
+
+  // Enviar pulso ultrasónico
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+
+  // Leer duración del pulso en echoPin
+  duracion = pulseIn(echoPin, HIGH);
+
+  // Calcular distancia en cm
+  distancia = duracion * 0.034 / 2;
+
+  Serial.print("Distancia: ");
+  Serial.print(distancia);
+  Serial.println(" cm");
+
+  // Si hay objeto a menos de 30 cm
+  if (distancia > 0 && distancia < distanciaMinima) {
+    miServo.write(60);      // Girar a 70°
+    delay(3000);            // Esperar 3 segundos
+    miServo.write(0);       // Volver a posición inicial
+    delay(500);             // Evitar múltiples activaciones
+  }
+
+  delay(200);
+}
